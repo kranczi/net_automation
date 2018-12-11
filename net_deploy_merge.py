@@ -14,6 +14,14 @@ class Net_Node:
 		driver = get_network_driver('junos')
 		self.node_driver = driver(self.hostname, self.username, self.password)
 
+	"""
+	Default netconf rpc timeout is 30 seconds.
+	This is not enough for srx cluster to commit the config.
+	Increase it to avoid RpcTimeoutError or TimeoutExpiredError
+	"""
+	def node_rpc_timeout(self):
+		self.node_driver.timeout = 300
+
 	def node_open(self):
 		self.node_driver.open()
 		print("opening " + str(self.hostname))
@@ -48,6 +56,7 @@ def main():
 	for i in megatron:
 		 n = Net_Node(i)
 		 n.node_driver()
+		 n.node_rpc_timeout()
 		 n.node_open()
 		 n.node_merge()
 		 n.node_compare_config()
