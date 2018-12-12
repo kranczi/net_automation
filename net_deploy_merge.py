@@ -46,6 +46,23 @@ class Net_Node:
 		print("closing " + str(self.hostname))
 		self.node_driver.close()
 
+	def node_discard(self):
+		self.node_driver.discard()
+
+	def node_decision(self):
+		change_decision = input('commit or discard?: ')
+		if change_decision == 'commit':
+			print('got it, committing like a boss')
+			self.node_commit()
+		elif change_decision == 'discard':
+			print('we cool, ain\'t bad playing it safe,  discarding like a boss')
+			self.node_discard()
+			print('see ya nerds, closing')
+		else:
+			print('something other')
+			self.node_discard()
+			raise sys.exit()
+
 def main():
 	"""
 	In the initial commit, nodes are iterated over a simple list.
@@ -60,7 +77,7 @@ def main():
 		 n.node_open()
 		 n.node_merge()
 		 n.node_compare_config()
-		 n.node_commit()
+		 n.node_decision()
 		 print("waiting before closing")
 		 time.sleep(30)
 		 n.node_close()
