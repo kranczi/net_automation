@@ -1,5 +1,4 @@
 #!/usr/bin/python2.7
-
 import sys
 import time
 from napalm import get_network_driver
@@ -50,7 +49,7 @@ class Net_Node:
 		self.node_driver.discard()
 
 	def node_decision(self):
-		change_decision = input('commit or discard?: ')
+		change_decision = raw_input('commit or discard?: ')
 		if change_decision == 'commit':
 			print('got it, committing like a boss')
 			self.node_commit()
