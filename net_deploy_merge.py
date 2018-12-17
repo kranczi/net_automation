@@ -58,26 +58,34 @@ class Net_Node:
 			self.node_discard()
 			raise sys.exit()
 
-def main():
-	"""
-	In the initial commit, nodes are iterated over a simple list.
-	upcoming commits will change that to json format split via nodes role in a DC
-	"""
-	optimus_prime = []
-	megatron = ['node1', 'node2']
-	for i in megatron:
-		 n = Net_Node(i)
-		 n.node_driver()
-		 n.node_rpc_timeout()
-		 n.node_open()
-		 n.node_merge()
-		 n.node_compare_config()
-		 n.node_decision()
-		 print("waiting before closing")
-		 time.sleep(30)
-		 n.node_close()
+optimus_prime = ['node1', 'node2']
+megatron = ['node3', 'node4']
+
+class Net_Commit:
+	def __init__(self):
+		for i in self.group_decision():
+			self = Net_Node(i)
+			self.node_driver()
+			self.node_open()
+			self.node_merge()
+			self.node_compare_config()
+			self.node_decision()
+			print("waiting before closing")
+			time.sleep(30)
+			self.node_close()
+
+	def group_decision(self):
+	    self = []
+	    print('1: ' + str(optimus_prime))
+	    print('2: ' + str(megatron))
+	    group_input = raw_input('choose from 1 or 2: ')
+	    if group_input == '1':
+	        self = optimus_prime
+	    elif group_input == '2':
+	        self = megatron
+	    return self
 
 if __name__ == "__main__":
-	main()
+	Net_Commit()
 
 sys.exit()
