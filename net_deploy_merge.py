@@ -26,11 +26,7 @@ class Net_Node:
 		print("opening " + str(self.hostname))
 
 	def node_merge(self):
-		"""
-		change filename to either sys argv or input on the next version,
-		consider roles/section of the change being made
-		"""
-		self.node_driver.load_merge_candidate(filename='config_goes_here')
+		self.node_driver.load_merge_candidate(filename=sys.argv[1])
 
 	def node_compare_config(self):
 		print("listing changes below: ")
