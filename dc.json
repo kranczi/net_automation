@@ -1,40 +1,40 @@
 {
-  "DCs": {
-    "DC1": {
-      "router": {
-        "router1": "IP1",
-        "router2": "IP2"
-      },
-      "switch": {
-        "switch1": "IP1",
-        "switch2": "IP2"
-      },
-      "fw": {
-        "fw1": "IP1",
-        "fw2": "IP2"
-      },
-      "tor": {
-        "tor1": "IP1",
-        "tor2": "IP2"
-      }
-    },
-    "DC2": {
-      "router": {
-        "router5": "IP5",
-        "router6": "IP6"
-      },
-      "switch": {
-        "switch5": "IP5",
-        "switch6": "IP6"
-      },
-      "fw": {
-        "fw5": "IP5",
-        "fw6": "IP6"
-      },
-      "tor": {
-        "tor5": "IP5",
-        "tor6": "IP6"
-      }
+    "DCs": {
+        "DC1": {
+            "router": {
+                "router1": "IP1",
+                "router2": "IP2"
+            },
+            "switch": {
+                "switch1": "IP1",
+                "switch2": "IP2"
+            },
+            "fw": {
+                "fw1": "IP1",
+                "fw2": "IP2"
+            },
+            "tor": {
+                "tor1": "IP1",
+                "tor2": "IP2"
+            }
+        },
+        "DC2": {
+            "router": {
+                "router5": "IP5",
+                "router6": "IP6"
+            },
+            "switch": {
+                "switch5": "IP5",
+                "switch6": "IP6"
+            },
+            "fw": {
+                "fw5": "IP5",
+                "fw6": "IP6"
+            },
+            "tor": {
+                "tor5": "IP5",
+                "tor6": "IP6"
+            }
+        }
     }
-  }
 }
