@@ -33,7 +33,6 @@ class NetNode:
 
     def node_open(self):
         self.node_driver.open()
-        print("opening " + str(self.hostname))
 
     def node_merge(self):
         self.node_driver.load_merge_candidate(filename=sys.argv[1])
@@ -48,7 +47,6 @@ class NetNode:
         self.node_driver.commit_config()
 
     def node_close(self):
-        print("closing " + str(self.hostname))
         self.node_driver.close()
 
     def node_discard(self):
@@ -57,6 +55,44 @@ class NetNode:
     def node_view_users(self):
         users = self.node_driver.get_users()
         print(users)
+
+    def node_bgp_status(self):
+        bgp_summary = self.node_driver.get_bgp_neighbors()
+        bgp_summary_d = {}
+        bgp_summary_list = []
+        with open('status_page_bgp', 'w') as sp_bgp_f:
+            for k, v in bgp_summary.items():
+                for k1, v1 in v['peers'].items():
+                    bgp_summary_d['vrouter'] = k
+                    bgp_summary_d['bgp_neigh'] = k1
+                    bgp_summary_d['bgp_neigh_desc'] = v1['description']
+                    bgp_summary_d['bgp_neigh_uptime'] = v1['uptime']
+                    json.dump(bgp_summary_d, sp_bgp_f, separators=(',', ':'), indent=4, sort_keys=True)
+                    sp_bgp_f.write(',\n')
+                    # sp_bgp_f.write(json.dumps((bgp_summary_d, indent=4)))
+                    # sp_bgp_f.write('\n' + str((k, k1, v1['description'], v1['uptime'])))
+                    # bgp_summary_list.append((k, k1, v1['description'], v1['uptime']))
+                    # sp_bgp_f.write(str(bgp_summary_list) + '\n')
+                    # print(bgp_summary_list)
+                    
+                    # print(k, str(k1), str(v1['description']), str(v1['uptime']))
+                    # sp_bgp_f.write(str(k) + ", " + str(k1) + ", " + str(v1['description']) + ", " + str(v1['uptime']) + '\n')
+                    # sp_bgp_f.write(str(k, str(k1), str(v1['description']), str(v1['uptime'])))
+
+    @staticmethod
+    def all_bgp_nodes():
+        for v in dcs_db.values():
+            for v1 in v.values():
+                return v1["router"].values()
+
+    def node_arp_table(self):
+        arp_ip_d = {}
+        arp_table = self.node_driver.get_arp_table()
+        with open('status_page_arp', 'w') as sp_arp_f:
+            for arp_ip in arp_table:
+                arp_ip_d['ip'] = arp_ip['ip']
+                arp_ip_d['mac'] = arp_ip['mac']
+                sp_arp_f.write(str(arp_ip_d) + '\n')
 
     def node_decision(self):
         change_decision = raw_input('commit or discard?: ')
@@ -117,12 +153,19 @@ class NetView:
             self.node_view_users()
             self.node_close()
 
+class NetStatus:
+
+    def __init__(self):
+        for i in NetNode.all_bgp_nodes():
+            self = NetNode(i)
+            self.node_driver()
+            self.node_rpc_timeout()
+            self.node_open()
+            self.node_bgp_status()
+            self.node_arp_table()
+            self.node_close()
 
 if __name__ == "__main__":
-    NetView()
-#    NetNode()
-#    NetCommit()
-
-
+    NetStatus()
 
 sys.exit()
