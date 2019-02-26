@@ -6,14 +6,12 @@ from napalm import get_network_driver
 
 
 dcs_raw = 'dc.json'
-#dc_sel = str(raw_input('select dc (or type \"all\" is for all): '))
-#role_sel = str(raw_input('select role: '))
 with open(dcs_raw, 'r') as dcs_file:
     dcs_db = json.load(dcs_file)
 
 class NetNode:
 
-    def __init__(self, hostname, username='vMx', password=''):
+    def __init__(self, hostname, username='user', password='password'):
         self.hostname = hostname
         self.username = username
         self.password = password
@@ -58,10 +56,9 @@ class NetNode:
 
     def node_bgp_status(self):
         bgp_summary = self.node_driver.get_bgp_neighbors()
-        with open('status_page_bgp.json', 'w') as sp_bgp_f_json:
+        with open('status_page_bgp.json', 'a') as sp_bgp_f_json:
             for k, v in bgp_summary.items():
                 for k1, v1 in v['peers'].items():
-                    bgp_summary_l = []
                     bgp_summary_d = {}
                     bgp_summary_d[self.hostname] = {}
                     bgp_summary_d[self.hostname][k] = {}
@@ -70,67 +67,34 @@ class NetNode:
                     bgp_summary_d[self.hostname][k]['bgp_neigh'] = k1
                     bgp_summary_d[self.hostname][k]['bgp_neigh_desc'] = v1['description']
                     bgp_summary_d[self.hostname][k]['bgp_neigh_uptime'] = v1['uptime']
-                    bgp_summary_l.append(bgp_summary_d)
-                    json.dump(bgp_summary_l, sp_bgp_f_json, separators=(',', ':'), indent=4, sort_keys=True)
-                    #sp_bgp_f_json.write('\n')
+                    json.dump(bgp_summary_d, sp_bgp_f_json, separators=(',', ':'), indent=4, sort_keys=True)
+                    sp_bgp_f_json.write('\n')
         
-        with open('status_page_bgp.txt', 'w') as sp_bgp_f_txt:
+        with open('status_page_bgp.txt', 'a') as sp_bgp_f_txt:
             for k, v in bgp_summary.items():
                 for k1, v1 in v['peers'].items():
                     bgp_summary_list = []
-                    # bgp_summary_d = {}
-                    # bgp_summary_d[self.hostname] = {}
-                    # bgp_summary_d[self.hostname][k] = {}
-                    # #bgp_summary_d['router'] = self.hostname
-                    # #bgp_summary_d[self.hostname]['vrouter'] = k
-                    # bgp_summary_d[self.hostname][k]['bgp_neigh'] = k1
-                    # bgp_summary_d[self.hostname][k]['bgp_neigh_desc'] = v1['description']
-                    # bgp_summary_d[self.hostname][k]['bgp_neigh_uptime'] = v1['uptime']
-                    # json.dump(bgp_summary_d, sp_bgp_f, separators=(',', ':'), indent=4, sort_keys=True)
-                    # sp_bgp_f_txt.write('\n')
-
-                    # sp_bgp_f.write(json.dumps((bgp_summary_d, indent=4)))
-                    # sp_bgp_f.write('\n' + str((k, k1, v1['description'], v1['uptime'])))
                     bgp_summary_list.append(str(self.hostname))
                     bgp_summary_list.append(k)
                     bgp_summary_list.append(str(k1))
                     bgp_summary_list.append(str(v1['description']))
                     bgp_summary_list.append(v1['uptime'])
                     sp_bgp_f_txt.write(str(bgp_summary_list) + '\n')
-                    # print(bgp_summary_list)
-                    
-                    # print(k, str(k1), str(v1['description']), str(v1['uptime']))
-                    # sp_bgp_f.write(str(k) + ", " + str(k1) + ", " + str(v1['description']) + ", " + str(v1['uptime']) + '\n')
-                    # sp_bgp_f.write(str(k, str(k1), str(v1['description']), str(v1['uptime'])))
 
     @staticmethod
     def all_bgp_nodes():
+
+        """
+        this should work with 'all' as function argument passed over to node_select()
+        however, it gets values from the 2nd main dict only. This is a workaround to get all of them
+        """
+
         router_list = []
-        b_nodes = dcs_db['DCs'].keys()
         for i in NetNode.node_select('DC1', 'router', dcs_db):
             router_list.append(i)
         for j in NetNode.node_select('DC2', 'router', dcs_db):
             router_list.append(j)
         return router_list
-
-
-
-        
-        # for v in dcs_db.values():
-        #     for k1, v1 in v.items():
-        #         for k2, v2 in v1.items():
-        #             print(k2, v2)
-        #         #return v1['router'].values()
-            #print(k)
-         #   for v1 in v[k]['router'].values():
-                #print(v1)
-            #print(v['DC1']['router'])
-            # print(v)
-            #for k1, v1 in v.items():
-                #print(k1)
-                #print(v1)
-                #print(v1['DC2']['router']).values()
-             #   return v1["router"].values()
 
     def node_arp_table(self):
         arp_ip_d = {}
@@ -174,39 +138,22 @@ class NetNode:
                                 return nodes_selected
 
 
-class NetCommit:
-
-    def __init__(self):
-        for i in NetNode.node_select(dc_sel, role_sel, dcs_db):
-            self = NetNode(i)
-            self.node_driver()
-            self.node_open()
-            self.node_merge()
-            self.node_compare_config()
-            self.node_decision()
-            print("waiting before closing")
-            time.sleep(30)
-            self.node_close()
-
-
-class NetView:
-
-    def __init__(self):
-        for i in NetNode.node_select(dc_sel, role_sel, dcs_db):
-            self = NetNode(i)
-            self.node_driver()
-            self.node_rpc_timeout()
-            self.node_open()
-            self.node_view_users()
-            self.node_close()
-
 class NetStatus:
 
     def __init__(self):
+
+        """
+        clear output files before feeding them with new data
+        def node_bgp_status() opens file in append mode
+        """
+
+        with open('status_page_bgp.txt', 'w') as sp_bgp_f_txt:
+            pass
+        with open('status_page_bgp.json', 'w') as sp_bgp_f_json:
+            pass
+
         for i in NetNode.all_bgp_nodes():
-            print(i)
             self = NetNode(i)
-            print(i)
             self.node_driver()
             self.node_rpc_timeout()
             self.node_open()
