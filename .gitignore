@@ -1,5 +1,6 @@
 Pipfile
 Pipfile.lock
 .vscode/
-status_page_arp
-status_page_bgp
+status_page_arp.txt
+status_page_bgp.json
+status_page_bgp.txt
