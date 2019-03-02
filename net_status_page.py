@@ -1,5 +1,6 @@
 #!/usr/bin/python2.7
 import sys
+import pprint
 import time
 import json
 from napalm import get_network_driver
@@ -55,10 +56,12 @@ class NetNode:
         print(users)
 
     def node_bgp_status(self):
-        # bgp_list = []
+        bgp_ext = {}
         bgp_summary = self.node_driver.get_bgp_neighbors()
         for k, v in bgp_summary.items():
+            # pprint.pprint(bgp_summary.items())
             for k1, v1 in v['peers'].items():
+                # pprint.pprint(v['peers'].items())
                 bgp_summary_d = {}
                 bgp_summary_d[self.hostname] = {}
                 bgp_summary_d[self.hostname][k] = {}
@@ -67,8 +70,22 @@ class NetNode:
                 bgp_summary_d[self.hostname][k]['bgp_neigh'] = k1
                 bgp_summary_d[self.hostname][k]['bgp_neigh_desc'] = v1['description']
                 bgp_summary_d[self.hostname][k]['bgp_neigh_uptime'] = v1['uptime']
+                yield bgp_summary_d
+
                 # print(bgp_summary_d)
-                return bgp_summary_d
+                # bgp_summary_d
+                #print(bgp_summary_d)
+        # bgp_per_ri = {}
+        # for i in bgp_summary.keys():
+        #     print(bgp_summary.keys())
+        #     bgp_per_ri.update(bgp_summary_d)
+        #     print(bgp_per_ri)
+        #     return bgp_per_ri
+
+                # print(bgp_per_ri)
+        # print(bgp_per_ri)
+        # return bgp_per_ri
+                
         
         # json.dump(bgp_summary_d, sp_bgp_f_json, separators=(',', ':'), indent=4, sort_keys=True)
                 # bgp_list.append(bgp_summary_d)
@@ -168,18 +185,35 @@ class NetStatus:
     #     self = {}
 
     def get_status(self):
-        bgp = {}
+        overall_bgp = []
         for i in NetNode.all_bgp_nodes():
             n = NetNode(i)
             n.node_driver()
             n.node_open()
             n.node_rpc_timeout()
-            b = n.node_bgp_status()
+            neigh_per_vrouter = n.node_bgp_status()
+            for b in neigh_per_vrouter:
+                overall_bgp.append(b)
             n.node_arp_table()
             n.node_close()
-            bgp.update(b)
         with open('status_page_bgp.json', 'w') as sp_bgp_f_json:
-            json.dump(bgp, sp_bgp_f_json, separators=(',', ':'), indent=4, sort_keys=True)
+            json.dump(overall_bgp, sp_bgp_f_json, separators=(',', ':'), indent=4, sort_keys=True)
+
+
+    def get_status_single(self):
+        bgp = []
+        n = NetNode('vmx2')
+        n.node_driver()
+        n.node_open()
+        n.node_rpc_timeout()
+        b = n.node_bgp_status()
+        for i in b:
+            bgp.append(i)
+        n.node_arp_table()
+        n.node_close()
+        print(bgp)
+        with open('single_status_page_bgp.json', 'w') as single_sp_bgp_f_json:
+             json.dump(bgp, single_sp_bgp_f_json, separators=(',', ':'), indent=4, sort_keys=True)
 
         # s.hostname = self.all_bgp_nodes()
         # for i in s.hostname():
